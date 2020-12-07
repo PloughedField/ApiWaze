@@ -1,0 +1,52 @@
+version: "3"
+services:
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: rabbitmq
+        hostname: rabbitmq
+
+        ports:
+            - 5672:5672
+            - 15672:15672
+
+    api_waze:
+        image: api-waze-fix-v8
+        container_name: my-running-app
+        hostname: my_app
+        network_mode: "host"
+
+
+    elasticsearch:
+        image: elasticsearch:7.9.3
+        container_name: elasticsearch
+        hostname: elasticsearch
+        environment:
+            - "discovery.type=single-node"
+        ports:
+            - 9200:9200
+            - 9300:9300
+
+    kibana:
+        image: kibana:7.9.3
+        container_name: kibana
+        hostname: kibana
+        ports:
+            - 5601:5601
+        depends_on:
+            - elasticsearch
+
+    logstash:
+        image: logstash:7.9.3
+        container_name: logstash
+        hostname: logstash
+        ports:
+            - 9600:9600
+            - 8089:8089
+        volumes:
+          - /config-dir/composetest/logstash-config:/usr/share/logstash/pipeline/
+
+        depends_on:
+             - api_waze
+
+
+
